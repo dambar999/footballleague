@@ -1,0 +1,74 @@
+#!groovy
+pipeline {
+    agent any
+
+    parameters {
+
+    }
+
+    stages {
+        stage('Build Trigger') {
+            when {
+                anyOf {
+                    branch 'master'; branch 'develop'; branch "release-*"
+                }
+            }
+            stages {
+                stage('Checkout') {
+                    steps {
+                        git(url: 'https://github.com/dambar999/footballleague.git',
+                                branch: env.BRANCH_NAME,
+                                changelog: true,
+                                credentialsId: 'jenkins-github-common-creds'
+                        )
+                    }
+                }
+                stage('Build') {
+                    steps {
+                        script {
+
+                            sh "./gradlew clean build "
+                        }
+                    }
+                }
+
+
+            stage('Build and Publish Docker Image') {
+                when {
+                    anyOf {
+                        branch 'develop';branch 'master'; branch "release"
+                    }
+                }
+                steps {
+                    script {
+
+
+                        sh "./build_docker_image.sh"
+
+
+                    }
+
+                }
+            }
+
+            stage('Deploy') {
+                when {
+                    anyOf {
+                        branch 'master'; branch "release-*"
+                    }
+                }
+                steps {
+                    echo 'Deploying'
+                    script {
+                       sh "./docker run -p  8888:8888 footballleaguedockerapp"
+                }
+            }
+
+
+        }
+    }
+}
+
+
+
+}
