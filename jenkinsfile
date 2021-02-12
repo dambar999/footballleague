@@ -19,7 +19,7 @@ pipeline {
                         git(url: 'https://github.com/dambar999/footballleague.git',
                                 branch: env.BRANCH_NAME,
                                 changelog: true,
-                                credentialsId: 'jenkins-github-common-creds'
+                                credentialsId: 'myrepotest'
                         )
                     }
                 }
@@ -33,7 +33,7 @@ pipeline {
                 }
 
 
-            stage('Build and Publish Docker Image') {
+            stage('Build  Docker Image') {
                 when {
                     anyOf {
                         branch 'develop';branch 'master'; branch "release"
